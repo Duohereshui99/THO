@@ -55,7 +55,7 @@ ccccccc
 
 ccccccc
             mu=amu*(mass_2*mass_1)/(mass_1+mass_2)              !约化质量
-            alpha=1d0/2d0/b**2!sqrt(mu*omega/hbarc)                !HOBASIS的无量纲参数α=mu*omega/hbar
+            alpha=1d0/2d0/b**2!sqrt(mu*omega/hbarc)             !HOBASIS的无量纲参数α=mu*omega/hbar
             !1/b**2=mu*omega/hbar,而basis的标准形式下的系数是mu*omega/2/hbar
             write(*,*) 'omega=',hbarc/mu/b**2
             write(*,*) 'nbasis=:',n_basis
@@ -95,8 +95,7 @@ ccccccc
                   s=s+ho3d(5,0,1d0/b**2,rr(k))**2*rrw(k)*rr(k)**2
             end do
             write(*,*)'ho3d的模:',sqrt(s)
-
-
+ccccccc
             do k=1,n_int
                   write(21,*) rr(k),ho3d(5,0,1d0/b**2,rr(k))
             end do               !!画图查看basis的图像
