@@ -49,10 +49,9 @@ ccccccc
             allocate(GG(1:n_diff))                  !均匀格点Coulomb函数G
             allocate(FF_1(1:n_int))                 !gauss积分点Coulomb函数F
             allocate(GG_1(1:n_int)) 
-            allocate(scatwf(1:n_int))                 !散射波函数
+            allocate(scatwf(1:n_int))              !散射波函数
             allocate(FC(0:L),GC(0:L))              !coul90的FC,GC
             allocate(FCP(0:L),GCP(0:L))
-
 ccccccc
             mu=amu*(mass_2*mass_1)/(mass_1+mass_2)              !约化质量
             alpha=1d0/2d0/b**2!sqrt(mu*omega/hbarc)             !HOBASIS的无量纲参数α=mu*omega/hbar
