@@ -82,10 +82,10 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
             psi(i,j)=FFR4(rr(j)/hcm,psi_1,n_diff)
             d2psi(i,j)=FFR4(rr(j)/hcm,d2psi_1,n_diff)
             end do 
-      end do
-      do i=1,n_int
-            vpot(i)=FFR4(rr(i)/hcm,vpot_1,n_diff)
-      end do
+            end do
+            do i=1,n_int
+                  vpot(i)=FFR4(rr(i)/hcm,vpot_1,n_diff)
+            end do
 ccccccc
 
 ccccccc           
