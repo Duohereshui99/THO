@@ -8,6 +8,6 @@
 
 &gaussianpot  v0=-72.15d0 r0=0 a=1.484 /
 
-&meshes  n_int=200 n_diff=12000 hcm=0.005 /
+&meshes  n_int=300 n_diff=3000 hcm=0.05 /
 
 

@@ -83,20 +83,25 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
             d2psi(i,j)=FFR4(rr(j)/hcm,d2psi_1,n_diff)
             end do 
       end do
-      do i=1,n_int
-            vpot(i)=FFR4(rr(i)/hcm,vpot_1,n_diff)
-      end do
+ccccccc
+            do i=1,n_int
+                  vpot(i)=FFR4(rr(i)/hcm,vpot_1,n_diff)
+            end do
 ccccccc
 
 ccccccc           
             s=0d0
+            t=0d0
             do k=1,n_int
-                  s=s+ho3d(5,0,1d0/b**2,rr(k))**2*rrw(k)*rr(k)**2
+                  s=s+ho3d(25,0,alpha,rr(k))**2*rrw(k)*rr(k)**2
+                  t=t+THOFUNC(25,0,alpha,gamma,m,rr(k))**2
+     &             *rrw(k)*rr(k)**2
             end do
-            write(*,*)'ho3d的模:',sqrt(s)
+            write(*,*)'norm of ho3d:',sqrt(s)
+            write(*,*)'norm of THOFUNC',sqrt(t)
 ccccccc
             do k=1,n_int
-                  write(21,*) rr(k),ho3d(5,0,1d0/b**2,rr(k))
+                  write(21,*) rr(k),THOFUNC(25,0,alpha,gamma,m,rr(k))!ho3d(3,0,1d0/b**2,rr(k))
             end do               !!画图查看basis的图像
 
 !积分算矩阵元
@@ -135,9 +140,9 @@ ccccccc
                   end if
             end do
             !!u表示最小正特征值或者是我们手动选取的下标
-            u=10
-             write(*,*)'minimum positive eigenvalue:',wr(u)
-             write(*,*)'index of the positive eigenvalue:',u
+            u=3
+            write(*,*)'minimum positive eigenvalue selected:',wr(u)
+            write(*,*)'index of the positive eigenvalue:',u
 ccccccc
            
 
@@ -145,10 +150,10 @@ ccccccc
 
             do i=0,n_basis
                   write(23,*) z(i)        !复特征值在fort.23里面
-                  write(24,*) vr(:,i)     !特征向量,按行write,fort.24
+                  write(24,*) vr(:,i)     !特征向量,按列write,fort.24
             end do
             
-            
+      !      do u=0,n_basis
             do i=1,n_int
                   s=0
                   do j=0,n_basis
@@ -156,8 +161,13 @@ ccccccc
                   end do
                   PHI(i)=s                      !这里的index i对应了rr的index
                   write(25,*) rr(i),PHI(i)      !最终径向波函数U=rR,fort.25
+                  write(26,*) rr(i),vpot(i)     !势,fort.26
             end do                              !PHI(i)对应rr(i)
-
+            t=0
+            do i=1,n_int
+               t=t+PHI(i)**2*rrw(i)   
+            end do
+            write(*,*)'norm of ps:',t
 ccccccc
 !!计算半径的方均根
             s=0
@@ -168,94 +178,95 @@ ccccccc
 ccccccc
 
 ccccccc
-            do i=1,n_int                 !!从势消失处定义match点,判据为势比较小的地方
-                  if(abs(vpot(i))<1e-3) then 
+            do i=1,n_int                        !!从势消失处定义match点,判据为势比较小的地方
+                  if(abs(vpot(i))<3e-3) then 
                         n_match=i
                         exit
                   end if
             end do
-            
 ccccccc           
 !比如我们选取最小正特征能量来算散射波函数,首先算它的k^2
 ccccccc
             k2=2d0*mu*wr(u)/hbarc**2      !!k^2,这里取的指标是u,需和前面的u对应
                                           !!k用sqrt(k2)表示
             eta=mu*Z_1*Z_2*e2/hbarc**2/sqrt(k2) !eta
-             CALL COUL90(sqrt(k2)*rr(n_match),eta,XLMIN,l,FC,GC,FCP,GCP
-     &      ,KFN,IFAIL)
-ccccccc
-             if(IFAIL /= 0 ) then
-                   write(*,*)"error when call coulomb function!"
-             end if
-ccccccc
-             hlp=complex(GC(l),FC(l))
-             hln=complex(GC(l),-FC(l))
-             dhlp=complex(GCP(l),FCP(l))
-             dhln=complex(GCP(l),-FCP(l))
-ccccccc
-!!match处的trial wf的导数先用前或后向差分方便算一下,如果误差比较大再去改别的算法          
-             dy=(PHI(n_match+1)-PHI(n_match))/
-     &       (rr(n_match+1)-rr(n_match))
-ccccccc  S矩阵元S_{l}
-             Sl=(dy*hln-PHI(n_match)*dhln*sqrt(k2))/
-     &      (dy*hlp-PHI(n_match)*dhlp*sqrt(k2))
-             write(*,*) 'L=',L,'Sl=',Sl
-      
-             c=(hln-Sl*hlp)*(0d0,1d0)/2d0/PHI(n_match)
+!              CALL COUL90(sqrt(k2)*rr(n_match),eta,XLMIN,l,FC,GC,FCP,GCP
+!      &      ,KFN,IFAIL)
+! ccccccc
+!              if(IFAIL /= 0 ) then
+!                    write(*,*)"error when call coulomb function!"
+!              end if
+! ccccccc
+!              hlp=complex(GC(l),FC(l))
+!              hln=complex(GC(l),-FC(l))
+!              dhlp=complex(GCP(l),FCP(l))
+!              dhln=complex(GCP(l),-FCP(l))
+! ccccccc
+! !!match处的trial wf的导数先用前或后向差分方便算一下,如果误差比较大再去改别的算法          
+!              dy=(PHI(n_match+1)-PHI(n_match))/
+!      &       (rr(n_match+1)-rr(n_match))
+! ccccccc  S矩阵元S_{l}
+!              Sl=(dy*hln-PHI(n_match)*dhln*sqrt(k2))/
+!      &      (dy*hlp-PHI(n_match)*dhlp*sqrt(k2))
+!              write(*,*) 'L=',L,'Sl=',Sl
+!       !       write(999,*) wr(u),Sl
+!       !      end do
 
-             scatwf=c*PHI
+!              c=(hln-Sl*hlp)*(0d0,1d0)/2d0/PHI(n_match)
 
-             do i=1,n_int
-                   write(27,*) rr(i),real(scatwf(i))
-                   write(28,*) rr(i),aimag(scatwf(i))
-                   write(29,*) rr(i),abs(scatwf(i))
-             end do
+!              scatwf=c*PHI
+
+!              do i=1,n_int
+!                    write(27,*) rr(i),real(scatwf(i))
+!                    write(28,*) rr(i),aimag(scatwf(i))
+!                    write(29,*) rr(i),abs(scatwf(i))
+!              end do
 ccccccc
 !             !!下面用给定的公式计算相移
 !             !!先写好f(r)及其二阶导数在gauss格点处的值
-!             do i=1,n_diff
-!                   fr(i)=f(beta,i*hcm)
-!                   d2fr(i)=d2f(beta,i*hcm)                  
-!             end do      
-! ccccccc
-!             do i=1,n_int
-!                   fr_1(i)=FFR4(rr(i)/hcm,fr,n_diff)
-!                   d2fr_1(i)=FFR4(rr(i)/hcm,d2fr,n_diff)
-!             end do
+            do i=1,n_diff
+                  fr(i)=f(beta,i*hcm)
+                  d2fr(i)=d2f(beta,i*hcm)                  
+            end do      
+ccccccc
+            do i=1,n_int
+                  fr_1(i)=FFR4(rr(i)/hcm,fr,n_diff)
+                  d2fr_1(i)=FFR4(rr(i)/hcm,d2fr,n_diff)
+            end do
 
-!             do i=1,n_diff                       !给COULOMB函数的均匀格点值
-!             CALL COUL90(sqrt(k2)*i*hcm,eta,XLMIN,l,FC,GC,FCP,GCP
-!      &      ,KFN,IFAIL)
-!             FF(i)=FC(l)
-!             GG(i)=GC(l)
-!             end do
+            do i=1,n_diff                       !给COULOMB函数的均匀格点值
+            CALL COUL90(sqrt(k2)*i*hcm,eta,XLMIN,l,FC,GC,FCP,GCP
+     &      ,KFN,IFAIL)
+            FF(i)=FC(l)
+            GG(i)=GC(l)
+            end do
 
-!             do i=1,n_int                       !给COULOMB函数的gauss格点值
-!             FF_1(i)=FFR4(rr(i)/hcm,FF,n_diff)
-!             GG_1(i)=FFR4(rr(i)/hcm,GG,n_diff)
-!             end do
+            do i=1,n_int                       !给COULOMB函数的gauss格点值
+            FF_1(i)=FFR4(rr(i)/hcm,FF,n_diff)
+            GG_1(i)=FFR4(rr(i)/hcm,GG,n_diff)
+            end do
 
-!             s=0                                 !!计算tanδ的分子
-!             do i=1,n_int                        !!wr选的指标是wr(u)
-!                  s=s+PHI(i)*wr(u)*fr_1(i)*FF_1(i)*rrw(i)
-!      &           -PHI(i)*(-hbarc*hbarc/2/mu)*d2fr_1(i)*FF_1(i)*rrw(i)
-!      &           -PHI(i)*vpot(i)*fr_1(i)*FF_1(i)*rrw(i)
-!             end do
-!             t=0
-!             do i=1,n_int                        !!计算tanδ的分母
-!                  t=t+PHI(i)*wr(u)*fr_1(i)*GG_1(i)*rrw(i)
-!      &           -PHI(i)*(-hbarc*hbarc/2/mu)*d2fr_1(i)*GG_1(i)*rrw(i)
-!      &           -PHI(i)*vpot(i)*fr_1(i)*GG_1(i)*rrw(i)
-!             end do
-!             write(*,*)'tanδ=',-s/t
-!             write(*,*)'δ=',atan(-s/t)
-!             write(*,*)'Sl=',exp(-2*(0d0,1d0)*atan(-s/t))
+            s=0                                 !!计算tanδ的分子
+            do i=1,n_int                        !!wr选的指标是wr(u)
+                 s=s+PHI(i)*wr(u)*fr_1(i)*FF_1(i)*rrw(i)
+     &           -PHI(i)*(-hbarc*hbarc/2/mu)*d2fr_1(i)*FF_1(i)*rrw(i)
+     &           -PHI(i)*vpot(i)*fr_1(i)*FF_1(i)*rrw(i)
+            end do
+            t=0
+            do i=1,n_int                        !!计算tanδ的分母
+                 t=t+PHI(i)*wr(u)*fr_1(i)*GG_1(i)*rrw(i)
+     &           -PHI(i)*(-hbarc*hbarc/2/mu)*d2fr_1(i)*GG_1(i)*rrw(i)
+     &           -PHI(i)*vpot(i)*fr_1(i)*GG_1(i)*rrw(i)
+            end do
+            write(*,*)'tanδ=',-s/t
+            write(*,*)'δ=',atan(-s/t)
+            write(*,*)'Sl=',exp(-2*(0d0,1d0)*atan(-s/t))
             deallocate(psi,d2psi,vpot,H,rr,rrw,wr,wi,vr)
             deallocate(vpot_1)
             deallocate(PHI,z,fr,d2fr)
             deallocate(psi_1,d2psi_1)
-         !   deallocate(fr,d2fr,fr_1,d2fr_1)
-          !  deallocate(FF,GG,FF_1,GG_1)
+        !    deallocate(fr,d2fr,fr_1,d2fr_1)
+            deallocate(FF,GG,FF_1,GG_1)
             deallocate(scatwf,FC,GC,FCP,GCP)
             call cpu_time(t2)
             write(*,*) 'cputime:',t2-t1

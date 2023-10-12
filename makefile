@@ -1,7 +1,11 @@
 # 定义编译器和链接器
 FC = gfortran
 LD = $(FC)
-
+#定义一些git bash的shell命令变量
+BASE := $(shell expr $(CURDIR) : "\(.*\)/.*")
+VERDATE := $(shell git log -1 --format=%cd  )
+VERREV := $(shell git log -1 --pretty=format:"%h")
+COMPDATE :=$(shell date)
 # 定义编译选项
 FFLAGS = -O3 -Wall -Wextra
 LDFLAGS = -llapack 
@@ -32,3 +36,18 @@ $(TARGET): $(OBJECTS)
 # 清理中间文件和可执行文件
 clean:
 	rm -f $(OBJECTS) $(TARGET) *.mod fort.*
+
+.PHONY: print-info
+
+print-info:
+	@echo "Base path: $(BASE)"
+	@echo "Version Date: $(VERDATE)"
+	@echo "Version Revision: $(VERREV)"
+	@echo "Compilation Date: $(COMPDATE)"
+
+run: THO
+	./THO < test.in
+	@echo "Base path: $(BASE)"
+	@echo "Version Date: $(VERDATE)"
+	@echo "Version Revision: $(VERREV)"
+	@echo "Compilation Date: $(COMPDATE)"	
